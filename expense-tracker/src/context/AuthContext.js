@@ -1,7 +1,8 @@
 'use client';
 
+import { authService } from '@/app/services/api';
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '@/services/api';
+
 
 const AuthContext = createContext();
 
