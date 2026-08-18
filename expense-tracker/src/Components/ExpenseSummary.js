@@ -130,4 +130,5 @@ export default function ExpenseSummary({ summary }) {
       )}
     </div>
   );
+  
 }
