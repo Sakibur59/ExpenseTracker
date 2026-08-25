@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
-import { authService } from '@/services/api';
+import { useState } from 'react';
+import { authService } from '../services/api';
+import { ProtectedRoute } from '@/Components/ProtectedRoute';
+
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
