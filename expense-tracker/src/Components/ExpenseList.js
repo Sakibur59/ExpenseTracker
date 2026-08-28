@@ -104,7 +104,7 @@ export default function ExpenseList({ expenses, onDelete, onEdit, onBulkDelete }
           )}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-blue-500/30">
             <span className="text-sm opacity-80">Total:</span>
-            <span className="font-bold ml-2">${totalAmount.toFixed(2)}</span>
+            <span className="font-bold ml-2">৳{totalAmount.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function ExpenseList({ expenses, onDelete, onEdit, onBulkDelete }
                 {format(new Date(expense.date), 'MMM dd, yyyy')}
               </div>
               <div className="col-span-1 text-right font-bold text-gray-900">
-                ${expense.amount.toFixed(2)}
+                ৳{expense.amount.toFixed(2)}
               </div>
               <div className="col-span-2 flex justify-end gap-2">
                 <button

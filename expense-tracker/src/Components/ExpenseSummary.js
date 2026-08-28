@@ -37,6 +37,18 @@ export default function ExpenseSummary({ summary }) {
 
   const { total, byCategory = [], recent = [] } = summary;
 
+  // Calculate current month total
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  const currentMonthTotal = recent
+    .filter(exp => {
+      const expDate = new Date(exp.date);
+      return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+    })
+    .reduce((sum, exp) => sum + exp.amount, 0);
+
   const chartData = {
     labels: byCategory.map(item => item._id),
     datasets: [
@@ -70,7 +82,7 @@ export default function ExpenseSummary({ summary }) {
           label: function(context) {
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = ((context.parsed / total) * 100).toFixed(1);
-            return `$${context.parsed.toFixed(2)} (${percentage}%)`;
+            return `৳${context.parsed.toFixed(2)} (${percentage}%)`;
           }
         }
       }
@@ -79,13 +91,13 @@ export default function ExpenseSummary({ summary }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Total Card - Gradient */}
+      {/* Total Card */}
       <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-blue-100 text-sm font-medium">Total Expenses</p>
             <p className="text-4xl font-bold mt-2">
-              ${total?.toFixed(2) || '0.00'}
+              ৳{total?.toFixed(2) || '0.00'}
             </p>
             <p className="text-blue-200 text-sm mt-2">
               {summary.totalCount || 0} transactions
@@ -97,8 +109,8 @@ export default function ExpenseSummary({ summary }) {
         </div>
         <div className="mt-4 pt-4 border-t border-white/20">
           <div className="flex justify-between text-sm">
-            <span className="text-blue-200">Current Month</span>
-            <span className="font-semibold">${summary.currentMonth || 0}</span>
+            <span className="text-blue-200">This Month</span>
+            <span className="font-semibold">৳{currentMonthTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -133,7 +145,7 @@ export default function ExpenseSummary({ summary }) {
                         </span>
                       </div>
                       <span className="text-sm font-semibold text-gray-900">
-                        ${item.total.toFixed(2)}
+                        ৳{item.total.toFixed(2)}
                       </span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
@@ -188,7 +200,7 @@ export default function ExpenseSummary({ summary }) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-gray-900">${expense.amount.toFixed(2)}</p>
+                  <p className="font-bold text-gray-900">৳{expense.amount.toFixed(2)}</p>
                 </div>
               </div>
             ))}

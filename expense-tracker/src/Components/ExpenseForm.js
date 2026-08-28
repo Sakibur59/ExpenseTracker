@@ -54,7 +54,7 @@ export default function ExpenseForm({
   initialData = {}, 
   isEdit = false, 
   onCancel,
-  isOpen = false 
+  isOpen = false
 }) {
   const [loading, setLoading] = useState(false);
   const [animate, setAnimate] = useState(false);
@@ -104,11 +104,11 @@ export default function ExpenseForm({
       if (onCancel) onCancel();
     }, 300);
   };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div 
         className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-all duration-300 ${
           animate ? 'opacity-100' : 'opacity-0'
@@ -116,13 +116,11 @@ export default function ExpenseForm({
         onClick={handleClose}
       />
       
-      {/* Modal */}
       <div 
         className={`relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-white/30 transform transition-all duration-300 ${
           animate ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-8'
         }`}
       >
-        {/* Header with Gradient */}
         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -147,16 +145,15 @@ export default function ExpenseForm({
           </div>
         </div>
 
-        {/* Form Body */}
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  💰 Amount
+                  💰 Amount (BDT)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">৳</span>
                   <input
                     type="number"
                     step="0.01"
