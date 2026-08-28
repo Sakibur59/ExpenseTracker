@@ -12,7 +12,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,7 +43,7 @@ export default function Dashboard() {
     try {
       await expenseService.create(data);
       await loadData();
-      setShowForm(false);
+      setIsModalOpen(false); 
     } catch (error) {
       console.error('Error creating expense:', error);
       alert('Failed to create expense');
@@ -55,7 +55,7 @@ export default function Dashboard() {
       await expenseService.update(editingExpense._id, data);
       await loadData();
       setEditingExpense(null);
-      setShowForm(false);
+      setIsModalOpen(false);  // Modal বন্ধ করুন
     } catch (error) {
       console.error('Error updating expense:', error);
       alert('Failed to update expense');
@@ -84,7 +84,17 @@ export default function Dashboard() {
 
   const handleEditExpense = (expense) => {
     setEditingExpense(expense);
-    setShowForm(true);
+    setIsModalOpen(true);
+  };
+
+  const handleAddExpense = () => {
+    setEditingExpense(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); 
+    setEditingExpense(null);
   };
 
   return (
@@ -103,17 +113,10 @@ export default function Dashboard() {
                 </p>
               </div>
               <button
-                onClick={() => {
-                  setEditingExpense(null);
-                  setShowForm(!showForm);
-                }}
-                className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 ${
-                  showForm 
-                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30' 
-                    : 'bg-white text-blue-600 hover:bg-blue-50 shadow-lg shadow-white/30'
-                }`}
+                onClick={handleAddExpense}
+                className="px-6 py-2.5 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 bg-white text-blue-600 hover:bg-blue-50 shadow-lg shadow-white/30"
               >
-                {showForm ? '✕ Cancel' : '➕ Add Expense'}
+                ➕ Add Expense
               </button>
             </div>
           </div>
@@ -135,28 +138,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Expense Form with Glass Effect */}
-          {showForm && (
-            <div className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl mb-8 border border-white/30">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-3xl">{editingExpense ? '✏️' : '📝'}</span>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-                </h2>
-              </div>
-              <ExpenseForm
-                onSubmit={editingExpense ? handleUpdateExpense : handleCreateExpense}
-                initialData={editingExpense || {}}
-                isEdit={!!editingExpense}
-                onCancel={() => {
-                  setEditingExpense(null);
-                  setShowForm(false);
-                }}
-              />
-            </div>
-          )}
-
-          {/* Expense List with Glass Effect */}
+          {/* Expense List */}
           <div className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl border border-white/30">
             <div className="flex items-center gap-3 mb-6">
               <span className="text-3xl">📋</span>
@@ -187,6 +169,13 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <ExpenseForm
+        isOpen={isModalOpen}
+        onSubmit={editingExpense ? handleUpdateExpense : handleCreateExpense}
+        initialData={editingExpense || {}}
+        isEdit={!!editingExpense}
+        onCancel={handleCloseModal}
+      />
     </ProtectedRoute>
   );
 }
