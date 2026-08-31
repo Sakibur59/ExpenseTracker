@@ -54,16 +54,17 @@ export default function ExpenseList({ expenses, onDelete, onEdit, onBulkDelete }
   };
 
   const handleBulkDelete = () => {
-    if (selectedExpenses.length === 0) return;
-    if (window.confirm(`Delete ${selectedExpenses.length} selected expenses?`)) {
-      onBulkDelete(selectedExpenses);
-      setSelectedExpenses([]);
+    if (selectedExpenses.length === 0) {
+      alert('Please select expenses to delete');
+      return;
     }
+    onBulkDelete(selectedExpenses);
+    setSelectedExpenses([]);
   };
 
   return (
     <div className="space-y-4">
-      {/* Filters and Controls */}
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-wrap gap-3">
           <div className="relative">
@@ -99,7 +100,7 @@ export default function ExpenseList({ expenses, onDelete, onEdit, onBulkDelete }
               onClick={handleBulkDelete}
               className="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-lg shadow-red-500/30 transition-all duration-300"
             >
-              🗑️ Delete Selected ({selectedExpenses.length})
+              🗑️ Delete ({selectedExpenses.length})
             </button>
           )}
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-blue-500/30">
@@ -175,11 +176,7 @@ export default function ExpenseList({ expenses, onDelete, onEdit, onBulkDelete }
                   ✏️ Edit
                 </button>
                 <button
-                  onClick={() => {
-                    if (window.confirm('Delete this expense?')) {
-                      onDelete(expense._id);
-                    }
-                  }}
+                  onClick={() => onDelete(expense._id)}
                   className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
                 >
                   🗑️

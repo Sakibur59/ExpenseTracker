@@ -5,17 +5,26 @@ import { useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/Components/ProtectedRoute';
 import ExpenseForm from '@/Components/ExpenseForm';
 import ExpenseList from '@/Components/ExpenseList';
-import { expenseService } from '../services/api';
 import ExpenseSummary from '@/Components/ExpenseSummary';
+import DeleteConfirmModal from '@/Components/DeleteConfirmModal';
+import toast from 'react-hot-toast';
+import { expenseService } from '../services/api';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Delete Modal States
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState(null);
+  const [deleteItems, setDeleteItems] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteType, setDeleteType] = useState('single');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -30,6 +39,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error loading data:', error);
       setError('Failed to load data. Please refresh the page.');
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -39,46 +49,73 @@ export default function Dashboard() {
     loadData();
   }, [loadData]);
 
+  // Handle Create Expense
   const handleCreateExpense = async (data) => {
     try {
       await expenseService.create(data);
       await loadData();
-      setIsModalOpen(false); 
+      setIsModalOpen(false);
+      toast.success('Expense added successfully! 🎉');
     } catch (error) {
       console.error('Error creating expense:', error);
-      alert('Failed to create expense');
+      toast.error('Failed to create expense');
     }
   };
 
+  // Handle Update Expense
   const handleUpdateExpense = async (data) => {
     try {
       await expenseService.update(editingExpense._id, data);
       await loadData();
       setEditingExpense(null);
-      setIsModalOpen(false);  // Modal বন্ধ করুন
+      setIsModalOpen(false);
+      toast.success('Expense updated successfully! ✏️');
     } catch (error) {
       console.error('Error updating expense:', error);
-      alert('Failed to update expense');
+      toast.error('Failed to update expense');
     }
   };
 
-  const handleDeleteExpense = async (id) => {
+  // Handle Delete (Open Modal)
+  const handleDeleteClick = (id) => {
+    setDeleteType('single');
+    setDeleteItemId(id);
+    setDeleteItems([]);
+    setDeleteModalOpen(true);
+  };
+
+  // Handle Bulk Delete (Open Modal)
+  const handleBulkDeleteClick = (ids) => {
+    if (ids.length === 0) {
+      toast.error('Please select expenses to delete');
+      return;
+    }
+    setDeleteType('bulk');
+    setDeleteItems(ids);
+    setDeleteItemId(null);
+    setDeleteModalOpen(true);
+  };
+
+  // Confirm Delete
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
-      await expenseService.delete(id);
+      if (deleteType === 'single') {
+        await expenseService.delete(deleteItemId);
+        toast.success('Expense deleted successfully! 🗑️');
+      } else {
+        await expenseService.bulkDelete(deleteItems);
+        toast.success(`${deleteItems.length} expenses deleted successfully! 🗑️`);
+      }
       await loadData();
+      setDeleteModalOpen(false);
+      setDeleteItemId(null);
+      setDeleteItems([]);
     } catch (error) {
       console.error('Error deleting expense:', error);
-      alert('Failed to delete expense');
-    }
-  };
-
-  const handleBulkDelete = async (ids) => {
-    try {
-      await expenseService.bulkDelete(ids);
-      await loadData();
-    } catch (error) {
-      console.error('Error bulk deleting expenses:', error);
-      alert('Failed to delete expenses');
+      toast.error('Failed to delete expense');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -93,7 +130,7 @@ export default function Dashboard() {
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false); 
+    setIsModalOpen(false);
     setEditingExpense(null);
   };
 
@@ -101,7 +138,7 @@ export default function Dashboard() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header with Gradient */}
+          {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 mb-8 shadow-xl">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -131,7 +168,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Summary Cards */}
+          {/* Summary */}
           {summary && !loading && (
             <div className="mb-8">
               <ExpenseSummary summary={summary} />
@@ -161,20 +198,40 @@ export default function Dashboard() {
             ) : (
               <ExpenseList
                 expenses={expenses}
-                onDelete={handleDeleteExpense}
+                onDelete={handleDeleteClick}
                 onEdit={handleEditExpense}
-                onBulkDelete={handleBulkDelete}
+                onBulkDelete={handleBulkDeleteClick}
               />
             )}
           </div>
         </div>
       </div>
+
+      {/* Expense Form Modal */}
       <ExpenseForm
         isOpen={isModalOpen}
         onSubmit={editingExpense ? handleUpdateExpense : handleCreateExpense}
         initialData={editingExpense || {}}
         isEdit={!!editingExpense}
         onCancel={handleCloseModal}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setDeleteItemId(null);
+          setDeleteItems([]);
+        }}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        title={deleteType === 'single' ? 'Delete Expense' : 'Delete Multiple Expenses'}
+        message={deleteType === 'single' 
+          ? 'Are you sure you want to delete this expense? This action cannot be undone.'
+          : `Are you sure you want to delete ${deleteItems.length} expenses? This action cannot be undone.`
+        }
+        itemCount={deleteType === 'single' ? 1 : deleteItems.length}
       />
     </ProtectedRoute>
   );
